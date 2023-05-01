@@ -1,3 +1,4 @@
+from __future__ import annotations
 from selenium.webdriver.common.by import By
 from utils.base_page import BasePage
 from selenium.webdriver.common.action_chains import ActionChains
@@ -8,8 +9,11 @@ class EconomicCalendarPage(BasePage):
     """
     EconomicCalendarPage class provides functions for interacting with the Economic Calendar page.
     """
-    SLIDER = (By.XPATH, '//mat-slider')
-    SLIDER_THUMB = (By.XPATH, '//mat-slider//div[contains(@class, "mat-slider-thumb")]')
+
+    SLIDE_TEXT = (By.CSS_SELECTOR, ".tc-finalval-tmz div.ng-star-inserted")
+    SLIDER = (By.CSS_SELECTOR, ".mat-slider.mat-slider-horizontal")
+    SLIDER_THUMB = (By.CSS_SELECTOR, ".mat-slider-thumb")
+    CALENDAR_DATE = (By.CSS_SELECTOR, "button[aria-pressed='true'")
 
     def __init__(self, driver):
         BasePage.__init__(self, driver)
@@ -25,32 +29,55 @@ class EconomicCalendarPage(BasePage):
             )
             return False
 
+    def get_current_slide_text(self) -> str:
+        """
+        Get the text of the currently selected slide
+
+        :return str: The text of the currently selected slide
+        """
+        slide_text_element = self.find_element(self.SLIDE_TEXT)
+        return slide_text_element.text
+
     def move_slider(self, index: int) -> None:
         """
         Move the slider to the specified index
-        Using the index, calculate the position to move the slider
 
         :param index:
         :return None:
         """
         slider = self.find_element(self.SLIDER)
+        max_value = int(slider.get_attribute("aria-valuemax"))
+
         slider_thumb = self.find_element(self.SLIDER_THUMB)
-        slider_width = slider.size["width"]
-        step_size = slider_width / 6  # Since there are 6 positions
 
-        # Calculate the position to move the slider
-        move_position = step_size * index
+        move_ratio = index / max_value
 
-        # Create action chain to move the slider using drag and drop
         actions = ActionChains(self.driver)
-        actions.drag_and_drop_by_offset(slider_thumb, move_position, 0).perform()
+        actions.click_and_hold(slider_thumb)
+        actions.move_by_offset(slider.size["width"] * move_ratio, 0)
+        actions.release()
+        actions.perform()
 
-        # Wait for the slider to settle
         time.sleep(1)
-
-        # Print the position of the slider thumb
+        print("current slide text: ", self.get_current_slide_text())
         slider_thumb_location = slider_thumb.location
         self.logger.info(f"Slider thumb location: {slider_thumb_location}")
 
-    def click_slider_element(self, index: int) -> None:
-        self.move_slider(index)
+    def get_calendar_date(self) -> str | tuple[str, str]:
+        """
+        Get the date of the currently selected calendar date
+
+        :return str: The date of the currently selected calendar date
+        """
+
+        calendar_date_element = self.find_elements(self.CALENDAR_DATE)
+        if len(calendar_date_element) == 1:
+            return calendar_date_element[0].get_attribute("aria-label")
+        else:
+            try:
+                return f"('{calendar_date_element[0].get_attribute('aria-label')}', '{calendar_date_element[1].get_attribute('aria-label')}')"
+            except Exception as e:
+                self.logger.error(
+                    f"Unexpected range of elements returned: {calendar_date_element}"
+                )
+                raise e

@@ -23,7 +23,10 @@ class BasePage:
         accept_cookies(locator, timeout): Clicks the accept cookies button on the page.
     """
 
-    ACCEPT_COOKIES_BUTTON = (By.CSS_SELECTOR, ".gtm-acceptDefaultCookieFirstVisit")
+    ACCEPT_COOKIES_BUTTON = (
+        By.XPATH,
+        "//div[@class='col-sm-5']//button[contains(text(), 'ACCEPT ALL')]",
+    )
     IFRAME = (By.ID, "iFrameResizer0")
 
     def __init__(self, driver: WebDriver):
@@ -76,7 +79,7 @@ class BasePage:
             self.wait_until_clickable_and_click(locator, timeout)
             self.logger.info("=== Cookies accepted ===")
         except Exception as e:
-            self.logger.warning(f"An error occurred while accepting cookies: {e}")
+            self.logger.info(f"An error occurred while accepting cookies: {e}")
 
     def switch_to_iframe(self, locator: Tuple[str, str] = IFRAME, timeout: int = 20):
         try:

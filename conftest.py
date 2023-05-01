@@ -2,11 +2,14 @@ import logging
 import os
 
 import pytest
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service as FirefoxService
 
 
 def setup_chrome(headless: bool) -> webdriver.Chrome:
@@ -15,9 +18,12 @@ def setup_chrome(headless: bool) -> webdriver.Chrome:
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
     if headless:
         chrome_options.add_argument("--headless")
-    return webdriver.Chrome(
-        executable_path=ChromeDriverManager().install(), options=chrome_options
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), options=chrome_options
     )
+    driver.maximize_window()
+    logging.info("Chrome browser setup complete.")
+    return driver
 
 
 def setup_firefox(headless: bool) -> webdriver.Firefox:
@@ -25,16 +31,17 @@ def setup_firefox(headless: bool) -> webdriver.Firefox:
     if headless:
         firefox_options.headless = True
     driver = webdriver.Firefox(
-        executable_path=GeckoDriverManager().install(), options=firefox_options
+        service=FirefoxService(GeckoDriverManager().install()), options=firefox_options
     )
     driver.maximize_window()
+    logging.info("Firefox browser setup complete.")
     return driver
 
 
 DRIVER_SETUP_FUNCTIONS = {"chrome": setup_chrome, "firefox": setup_firefox}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def driver_instance(request):
     browser = request.config.getoption("--browser")
     url = request.config.getoption("--url")
@@ -50,15 +57,18 @@ def driver_instance(request):
         f"Browser: {browser} execution started on {url} with headless mode: {headless} at {os.getcwd()}, time: {os.times()}"
     )
     driver.get(url)
-    request.addfinalizer(driver.quit)
+
+    yield driver
+
+    driver.quit()
+
     logging.info(
         f"Browser: {browser} execution finished on {url} with headless mode: {headless} at {os.getcwd()}, time: {os.times()}"
     )
 
-    return driver
-
 
 def pytest_addoption(parser) -> None:
+    load_dotenv()
     parser.addoption(
         "--browser",
         action="store",
@@ -68,7 +78,7 @@ def pytest_addoption(parser) -> None:
     parser.addoption(
         "--url",
         action="store",
-        default="https://www.xm.com/",
+        default=f"{os.getenv('BASE_URL')}",
         help="Choose the url to run the tests on",
     )
     parser.addoption(

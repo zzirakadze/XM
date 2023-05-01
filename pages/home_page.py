@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from utils.base_page import BasePage
+from time import sleep
 
 
 class HomePage(BasePage):
@@ -15,6 +16,7 @@ class HomePage(BasePage):
 
     def click_research_and_education(self) -> None:
         try:
+            sleep(1)
             self.wait_until_clickable_and_click(self.RESEARCH_AND_EDUCATION)
         except Exception as e:
             self.logger.error(
