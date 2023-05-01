@@ -5,6 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from time import sleep
 
 
 class BasePage:
@@ -28,6 +29,7 @@ class BasePage:
         "//div[@class='col-sm-5']//button[contains(text(), 'ACCEPT ALL')]",
     )
     IFRAME = (By.ID, "iFrameResizer0")
+    TABLE_CONTENT = (By.ID, "economic-calendar-list")
 
     def __init__(self, driver: WebDriver):
         self.driver = driver
@@ -45,7 +47,7 @@ class BasePage:
             raise
 
     def find_elements(
-        self, locator: Tuple[str, str], timeout: int = 10
+            self, locator: Tuple[str, str], timeout: int = 10
     ) -> List[WebElement]:
         try:
             elements = WebDriverWait(self.driver, timeout).until(
@@ -59,7 +61,7 @@ class BasePage:
             raise
 
     def wait_until_clickable_and_click(
-        self, locator: Tuple[str, str], timeout: int = 10
+            self, locator: Tuple[str, str], timeout: int = 10
     ):
         try:
             element = WebDriverWait(self.driver, timeout).until(
@@ -73,7 +75,7 @@ class BasePage:
             raise
 
     def accept_cookies(
-        self, locator: Tuple[str, str] = ACCEPT_COOKIES_BUTTON, timeout: int = 20
+            self, locator: Tuple[str, str] = ACCEPT_COOKIES_BUTTON, timeout: int = 20
     ):
         try:
             self.wait_until_clickable_and_click(locator, timeout)
@@ -89,3 +91,8 @@ class BasePage:
         except Exception as e:
             self.logger.warning(f"An error occurred while switching to iframe: {e}")
             raise
+
+    def get_element_content(self, locator: Tuple[str, str] = TABLE_CONTENT) -> str:
+        sleep(1)
+        element = self.find_element(locator)
+        return element.text

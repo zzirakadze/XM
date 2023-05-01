@@ -1,5 +1,5 @@
 import pytest
-from zzassertions.assertions import assertTrue, assertEquals
+from zzassertions.assertions import assertTrue, assertEquals, assertNotEquals
 from utils.date_time_calculator import DateGenerator
 
 
@@ -30,7 +30,10 @@ class TestEconomicCalendarSlider:
         res_and_edu_page.move_to_economic_calendar()
         assertTrue(economic_calendar_page.is_present())
 
-        # move slider and assert date
+        # move slider, save content and assert date
+        old_content = economic_calendar_page.get_element_content()
         economic_calendar_page.move_slider(index)
         actual_date = economic_calendar_page.get_calendar_date()
+        actual_content = economic_calendar_page.get_element_content()
         assertEquals(actual_date, expected_date)
+        assertNotEquals(old_content, actual_content)

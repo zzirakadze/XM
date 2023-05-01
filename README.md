@@ -37,7 +37,7 @@ To run the tests in parallel, execute the following command:
    pytest tests/ --html=report.html -v -s -n 4
 ```
 
-To run tests on a different browser, provide cmd argument environment variable:
+To run tests on a different browser, provide cmd argument `--browser` with the browser name:
 
 ````bash
     pytest tests/ --browser firefox --html=report.html -v -s
