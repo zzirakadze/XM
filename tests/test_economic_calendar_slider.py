@@ -6,6 +6,7 @@ from utils.date_time_calculator import DateGenerator
 class TestEconomicCalendarSlider:
     time = DateGenerator()
 
+    @pytest.mark.research_and_education
     @pytest.mark.parametrize(
         "index, expected_date",
         [

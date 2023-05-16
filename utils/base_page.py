@@ -47,7 +47,7 @@ class BasePage:
             raise
 
     def find_elements(
-            self, locator: Tuple[str, str], timeout: int = 10
+        self, locator: Tuple[str, str], timeout: int = 10
     ) -> List[WebElement]:
         try:
             elements = WebDriverWait(self.driver, timeout).until(
@@ -61,7 +61,7 @@ class BasePage:
             raise
 
     def wait_until_clickable_and_click(
-            self, locator: Tuple[str, str], timeout: int = 10
+        self, locator: Tuple[str, str], timeout: int = 10
     ):
         try:
             element = WebDriverWait(self.driver, timeout).until(
@@ -75,7 +75,7 @@ class BasePage:
             raise
 
     def accept_cookies(
-            self, locator: Tuple[str, str] = ACCEPT_COOKIES_BUTTON, timeout: int = 20
+        self, locator: Tuple[str, str] = ACCEPT_COOKIES_BUTTON, timeout: int = 20
     ):
         try:
             self.wait_until_clickable_and_click(locator, timeout)
